@@ -1,5 +1,4 @@
-package com.capacitorjs.community.plugins.bluetoothle
-
+package com.tsi.plugins.bluetoothle
 
 fun bytesToString(bytes: ByteArray): String {
     val stringBuilder = StringBuilder(bytes.size)

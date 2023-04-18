@@ -1,5 +1,8 @@
-package com.capacitorjs.community.plugins.bluetoothle
+package com.tsi.community.plugins.bluetoothle
 
+import com.tsi.plugins.bluetoothle.bytesToString
+import com.tsi.plugins.bluetoothle.hexToByte
+import com.tsi.plugins.bluetoothle.stringToBytes
 import junit.framework.TestCase
 
 fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos -> ints[pos].toByte() }

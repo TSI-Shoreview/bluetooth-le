@@ -1,4 +1,4 @@
-package com.capacitorjs.community.plugins.bluetoothle
+package com.tsi.plugins.bluetoothle
 
 import android.app.PendingIntent
 import android.app.Service

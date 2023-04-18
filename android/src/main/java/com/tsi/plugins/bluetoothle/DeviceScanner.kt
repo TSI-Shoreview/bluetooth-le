@@ -1,4 +1,4 @@
-package com.capacitorjs.community.plugins.bluetoothle
+package com.tsi.plugins.bluetoothle
 
 import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
@@ -12,7 +12,6 @@ import android.os.Handler
 import android.os.Looper
 import android.widget.ArrayAdapter
 import com.getcapacitor.Logger
-
 
 class ScanResponse(
     val success: Boolean,
