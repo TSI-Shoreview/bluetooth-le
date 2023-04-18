@@ -302,6 +302,7 @@ export interface BluetoothLePlugin {
   readRssi(options: DeviceIdOptions): Promise<ReadRssiResult>;
   read(options: ReadOptions & TimeoutOptions): Promise<ReadResult>;
   write(options: WriteOptions & TimeoutOptions): Promise<void>;
+  writeInfinite(options: WriteOptions & TimeoutOptions): Promise<void>;
   writeWithoutResponse(options: WriteOptions & TimeoutOptions): Promise<void>;
   readDescriptor(options: ReadDescriptorOptions & TimeoutOptions): Promise<ReadResult>;
   writeDescriptor(options: WriteDescriptorOptions & TimeoutOptions): Promise<void>;

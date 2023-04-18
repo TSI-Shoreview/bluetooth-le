@@ -5,9 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Build
-import android.os.Handler
-import android.os.Looper
+import android.os.*
 import com.getcapacitor.Logger
 import java.util.*
 
@@ -20,8 +18,8 @@ class Device(
     private val context: Context,
     bluetoothAdapter: BluetoothAdapter,
     private val address: String,
-    private val onDisconnect: () -> Unit
-) {
+    private val onDisconnect: () -> Unit) : java.io.Serializable
+{
     companion object {
         private val TAG = Device::class.java.simpleName
         private const val STATE_DISCONNECTED = 0
@@ -365,6 +363,15 @@ class Device(
         }
         setTimeout(key, "Read timeout.", timeout)
     }
+
+//    fun writePerpetually(
+//        serviceUUID: UUID,
+//        characteristicUUID: UUID,
+//        value: String,
+//        writeType: Int,
+//        timeout: Long,
+//        callback: (CallbackResponse) -> Unit
+//    )
 
     fun write(
         serviceUUID: UUID,

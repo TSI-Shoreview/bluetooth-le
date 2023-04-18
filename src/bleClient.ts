@@ -220,6 +220,18 @@ export interface BleClientInterface {
   ): Promise<void>;
 
   /**
+   * Write to a characteristic infinitely. Right now just writes "ping"
+   * @param deviceId
+   * @param service
+   * @param characteristic
+   */
+  writeInfinite(
+    deviceId: string,
+    service: string,
+    characteristic: string
+  ): Promise<void>;
+
+  /**
    * Write a value to a characteristic without waiting for a response.
    * @param deviceId The ID of the device to use (obtained from [requestDevice](#requestDevice) or [requestLEScan](#requestLEScan))
    * @param service UUID of the service (see [UUID format](#uuid-format))
@@ -561,6 +573,20 @@ class BleClientClass implements BleClientInterface {
         ...options,
       });
     });
+  }
+
+  async writeInfinite(deviceId: string, service: string, characteristic: string): Promise<void> {
+      service = parseUUID(service)
+      characteristic = parseUUID(characteristic)
+
+      return this.queue(async () => {
+        await BluetoothLe.writeInfinite({
+          deviceId,
+          service,
+          characteristic,
+          value: "ping"
+        });
+      });
   }
 
   async writeWithoutResponse(

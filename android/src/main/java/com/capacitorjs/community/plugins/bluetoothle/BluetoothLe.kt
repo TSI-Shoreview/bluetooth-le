@@ -15,6 +15,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.ParcelUuid
 import android.provider.Settings.*
+import androidx.annotation.RequiresApi
 import androidx.core.location.LocationManagerCompat
 import com.getcapacitor.*
 import com.getcapacitor.annotation.CapacitorPlugin
@@ -624,6 +625,21 @@ class BluetoothLe : Plugin() {
                 }
             }
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    @PluginMethod
+    fun writeInfinite(call: PluginCall) {
+        val device = getDevice(call) ?: return
+        val characteristic = getCharacteristic(call) ?: return
+
+        val intent = Intent(context, FSAuthor::class.java)
+        intent.putExtra("bt-dev", device)
+        intent.putExtra("svc", characteristic.first)
+        intent.putExtra("char", characteristic.second)
+        context.startForegroundService(intent)
+
+        call.resolve()
     }
 
     @PluginMethod

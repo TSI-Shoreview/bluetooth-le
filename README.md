@@ -75,6 +75,7 @@ Below is an index of all the methods available.
 - [`readRssi(...)`](#readrssi)
 - [`read(...)`](#read)
 - [`write(...)`](#write)
+- [`writeInfinite(...)`](#writeinfinite)
 - [`writeWithoutResponse(...)`](#writewithoutresponse)
 - [`readDescriptor(...)`](#readdescriptor)
 - [`writeDescriptor(...)`](#writedescriptor)
@@ -763,6 +764,22 @@ Write a value to a characteristic. For an example, see [usage](#usage).
 | **`characteristic`** | <code>string</code>                                       | UUID of the characteristic (see [UUID format](#uuid-format))                                                                                                                                |
 | **`value`**          | <code><a href="#dataview">DataView</a></code>             | The value to write as a <a href="#dataview">DataView</a>. To create a <a href="#dataview">DataView</a> from an array of numbers, there is a helper function, e.g. numbersToDataView([1, 0]) |
 | **`options`**        | <code><a href="#timeoutoptions">TimeoutOptions</a></code> | Options for plugin call                                                                                                                                                                     |
+
+---
+
+### writeInfinite(...)
+
+```typescript
+writeInfinite(deviceId: string, service: string, characteristic: string) => Promise<void>
+```
+
+Write to a characteristic infinitely. Right now just writes "ping"
+
+| Param                | Type                |
+| -------------------- | ------------------- |
+| **`deviceId`**       | <code>string</code> |
+| **`service`**        | <code>string</code> |
+| **`characteristic`** | <code>string</code> |
 
 ---
 
