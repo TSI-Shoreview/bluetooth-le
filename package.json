@@ -1,6 +1,6 @@
 {
   "name": "@tsi/cap-bluetooth-le",
-  "version": "2.2.4-beta.7",
+  "version": "2.2.4-beta.8",
   "description": "Capacitor plugin for Bluetooth Low Energy ",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
