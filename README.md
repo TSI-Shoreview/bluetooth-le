@@ -75,13 +75,15 @@ Below is an index of all the methods available.
 - [`readRssi(...)`](#readrssi)
 - [`read(...)`](#read)
 - [`write(...)`](#write)
-- [`writeInfinite(...)`](#writeinfinite)
 - [`writeWithoutResponse(...)`](#writewithoutresponse)
 - [`readDescriptor(...)`](#readdescriptor)
 - [`writeDescriptor(...)`](#writedescriptor)
 - [`startNotifications(...)`](#startnotifications)
 - [`stopNotifications(...)`](#stopnotifications)
+- [`clearCache()`](#clearcache)
+- [`catchup(...)`](#catchup)
 - [Interfaces](#interfaces)
+- [Type Aliases](#type-aliases)
 - [Enums](#enums)
 
 </docgen-index>
@@ -767,22 +769,6 @@ Write a value to a characteristic. For an example, see [usage](#usage).
 
 ---
 
-### writeInfinite(...)
-
-```typescript
-writeInfinite(deviceId: string, service: string, characteristic: string) => Promise<void>
-```
-
-Write to a characteristic infinitely. Right now just writes "ping"
-
-| Param                | Type                |
-| -------------------- | ------------------- |
-| **`deviceId`**       | <code>string</code> |
-| **`service`**        | <code>string</code> |
-| **`characteristic`** | <code>string</code> |
-
----
-
 ### writeWithoutResponse(...)
 
 ```typescript
@@ -843,7 +829,7 @@ Write a value to a descriptor.
 ### startNotifications(...)
 
 ```typescript
-startNotifications(deviceId: string, service: string, characteristic: string, callback: (value: DataView) => void) => Promise<void>
+startNotifications(deviceId: string, service: string, characteristic: string, callback: (timestamp: number, value: DataView) => void) => Promise<void>
 ```
 
 Start listening to changes of the value of a characteristic.
@@ -851,12 +837,12 @@ Note that you should only start the notifications once per characteristic in you
 not call `startNotifications` in every component that needs the data.
 For an example, see [usage](#usage).
 
-| Param                | Type                                                              | Description                                                                                                    |
-| -------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| **`deviceId`**       | <code>string</code>                                               | The ID of the device to use (obtained from [requestDevice](#requestDevice) or [requestLEScan](#requestLEScan)) |
-| **`service`**        | <code>string</code>                                               | UUID of the service (see [UUID format](#uuid-format))                                                          |
-| **`characteristic`** | <code>string</code>                                               | UUID of the characteristic (see [UUID format](#uuid-format))                                                   |
-| **`callback`**       | <code>(value: <a href="#dataview">DataView</a>) =&gt; void</code> | Callback function to use when the value of the characteristic changes                                          |
+| Param                | Type                                                                                 | Description                                                                                                    |
+| -------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| **`deviceId`**       | <code>string</code>                                                                  | The ID of the device to use (obtained from [requestDevice](#requestDevice) or [requestLEScan](#requestLEScan)) |
+| **`service`**        | <code>string</code>                                                                  | UUID of the service (see [UUID format](#uuid-format))                                                          |
+| **`characteristic`** | <code>string</code>                                                                  | UUID of the characteristic (see [UUID format](#uuid-format))                                                   |
+| **`callback`**       | <code>(timestamp: number, value: <a href="#dataview">DataView</a>) =&gt; void</code> | Callback function to use when the value of the characteristic changes                                          |
 
 ---
 
@@ -876,54 +862,42 @@ Stop listening to the changes of the value of a characteristic. For an example, 
 
 ---
 
+### clearCache()
+
+```typescript
+clearCache() => Promise<void>
+```
+
+---
+
+### catchup(...)
+
+```typescript
+catchup(options: CatchupOptions) => Promise<void>
+```
+
+| Param         | Type                                                      |
+| ------------- | --------------------------------------------------------- |
+| **`options`** | <code><a href="#catchupoptions">CatchupOptions</a></code> |
+
+---
+
 ### Interfaces
 
 #### InitializeOptions
 
-| Prop                          | Type                 | Description                                                                                                                                                                                                                                                                                                                                      | Default            |
-| ----------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------ |
-| **`androidNeverForLocation`** | <code>boolean</code> | If your app doesn't use Bluetooth scan results to derive physical location information, you can strongly assert that your app doesn't derive physical location. (Android only) Requires adding 'neverForLocation' to AndroidManifest.xml https://developer.android.com/guide/topics/connectivity/bluetooth/permissions#assert-never-for-location | <code>false</code> |
+| Prop                          | Type                                                                        | Description                                                                                                                                                                                                                                                                                                                                      | Default            |
+| ----------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------ |
+| **`androidNeverForLocation`** | <code>boolean</code>                                                        | If your app doesn't use Bluetooth scan results to derive physical location information, you can strongly assert that your app doesn't derive physical location. (Android only) Requires adding 'neverForLocation' to AndroidManifest.xml https://developer.android.com/guide/topics/connectivity/bluetooth/permissions#assert-never-for-location | <code>false</code> |
+| **`isForeground`**            | <code>boolean</code>                                                        | (Android only) Runs the BLE stack in a foreground service, so it can read and write while your app is in the background, or the device is in doze mode.                                                                                                                                                                                          | <code>false</code> |
+| **`onInitSuccess`**           | <code>((event: <a href="#finitsuccess">fInitSuccess</a>) =&gt; void)</code> |                                                                                                                                                                                                                                                                                                                                                  |                    |
+| **`onInitFailed`**            | <code>((event: <a href="#finitfailed">fInitFailed</a>) =&gt; void)</code>   |                                                                                                                                                                                                                                                                                                                                                  |                    |
 
-#### DisplayStrings
+#### fInitSuccess
 
-| Prop                   | Type                | Default                          | Since |
-| ---------------------- | ------------------- | -------------------------------- | ----- |
-| **`scanning`**         | <code>string</code> | <code>"Scanning..."</code>       | 0.0.1 |
-| **`cancel`**           | <code>string</code> | <code>"Cancel"</code>            | 0.0.1 |
-| **`availableDevices`** | <code>string</code> | <code>"Available devices"</code> | 0.0.1 |
-| **`noDeviceFound`**    | <code>string</code> | <code>"No device found"</code>   | 0.0.1 |
-
-#### BleDevice
-
-| Prop           | Type                  | Description                                                                                                                                       |
-| -------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`deviceId`** | <code>string</code>   | ID of the device, which will be needed for further calls. On **Android** this is the BLE MAC address. On **iOS** and **web** it is an identifier. |
-| **`name`**     | <code>string</code>   | Name of the peripheral device.                                                                                                                    |
-| **`uuids`**    | <code>string[]</code> |                                                                                                                                                   |
-
-#### RequestBleDeviceOptions
-
-| Prop                   | Type                                          | Description                                                                                                                                                                                                                                               |
-| ---------------------- | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`services`**         | <code>string[]</code>                         | Filter devices by service UUIDs. UUIDs have to be specified as 128 bit UUID strings, e.g. ['0000180d-0000-1000-8000-00805f9b34fb'] There is a helper function to convert numbers to UUIDs. e.g. [numberToUUID(0x180f)]. (see [UUID format](#uuid-format)) |
-| **`name`**             | <code>string</code>                           | Filter devices by name                                                                                                                                                                                                                                    |
-| **`namePrefix`**       | <code>string</code>                           | Filter devices by name prefix                                                                                                                                                                                                                             |
-| **`optionalServices`** | <code>string[]</code>                         | For **web**, all services that will be used have to be listed under services or optionalServices, e.g. [numberToUUID(0x180f)] (see [UUID format](#uuid-format))                                                                                           |
-| **`allowDuplicates`**  | <code>boolean</code>                          | Normally scans will discard the second and subsequent advertisements from a single device. If you need to receive them, set allowDuplicates to true (only applicable in `requestLEScan`). (default: false)                                                |
-| **`scanMode`**         | <code><a href="#scanmode">ScanMode</a></code> | Android scan mode (default: <a href="#scanmode">ScanMode.SCAN_MODE_BALANCED</a>)                                                                                                                                                                          |
-
-#### ScanResult
-
-| Prop                   | Type                                                              | Description                                                                                                                                                                                                                                                                                           |
-| ---------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`device`**           | <code><a href="#bledevice">BleDevice</a></code>                   | The peripheral device that was found in the scan. **Android** and **web**: `device.name` is always identical to `localName`. **iOS**: `device.name` is identical to `localName` the first time a device is discovered, but after connecting `device.name` is the cached GAP name in subsequent scans. |
-| **`localName`**        | <code>string</code>                                               | The name of the peripheral device from the advertisement data.                                                                                                                                                                                                                                        |
-| **`rssi`**             | <code>number</code>                                               | Received Signal Strength Indication.                                                                                                                                                                                                                                                                  |
-| **`txPower`**          | <code>number</code>                                               | Transmit power in dBm. A value of 127 indicates that it is not available.                                                                                                                                                                                                                             |
-| **`manufacturerData`** | <code>{ [key: string]: <a href="#dataview">DataView</a>; }</code> | Manufacturer data, key is a company identifier and value is the data.                                                                                                                                                                                                                                 |
-| **`serviceData`**      | <code>{ [key: string]: <a href="#dataview">DataView</a>; }</code> | Service data, key is a service UUID and value is the data.                                                                                                                                                                                                                                            |
-| **`uuids`**            | <code>string[]</code>                                             | Advertised services.                                                                                                                                                                                                                                                                                  |
-| **`rawAdvertisement`** | <code><a href="#dataview">DataView</a></code>                     | Raw advertisement data (**Android** only).                                                                                                                                                                                                                                                            |
+| Prop        | Type                                  |
+| ----------- | ------------------------------------- |
+| **`value`** | <code><a href="#data">Data</a></code> |
 
 #### DataView
 
@@ -966,6 +940,53 @@ buffer as needed.
 | Method    | Signature                                                                               | Description                                                     |
 | --------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
 | **slice** | (begin: number, end?: number \| undefined) =&gt; <a href="#arraybuffer">ArrayBuffer</a> | Returns a section of an <a href="#arraybuffer">ArrayBuffer</a>. |
+
+#### fInitFailed
+
+| Prop        | Type                                  |
+| ----------- | ------------------------------------- |
+| **`value`** | <code><a href="#data">Data</a></code> |
+
+#### DisplayStrings
+
+| Prop                   | Type                | Default                          | Since |
+| ---------------------- | ------------------- | -------------------------------- | ----- |
+| **`scanning`**         | <code>string</code> | <code>"Scanning..."</code>       | 0.0.1 |
+| **`cancel`**           | <code>string</code> | <code>"Cancel"</code>            | 0.0.1 |
+| **`availableDevices`** | <code>string</code> | <code>"Available devices"</code> | 0.0.1 |
+| **`noDeviceFound`**    | <code>string</code> | <code>"No device found"</code>   | 0.0.1 |
+
+#### BleDevice
+
+| Prop           | Type                  | Description                                                                                                                                       |
+| -------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`deviceId`** | <code>string</code>   | ID of the device, which will be needed for further calls. On **Android** this is the BLE MAC address. On **iOS** and **web** it is an identifier. |
+| **`name`**     | <code>string</code>   | Name of the peripheral device.                                                                                                                    |
+| **`uuids`**    | <code>string[]</code> |                                                                                                                                                   |
+
+#### RequestBleDeviceOptions
+
+| Prop                   | Type                                          | Description                                                                                                                                                                                                                                               |
+| ---------------------- | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`services`**         | <code>string[]</code>                         | Filter devices by service UUIDs. UUIDs have to be specified as 128 bit UUID strings, e.g. ['0000180d-0000-1000-8000-00805f9b34fb'] There is a helper function to convert numbers to UUIDs. e.g. [numberToUUID(0x180f)]. (see [UUID format](#uuid-format)) |
+| **`name`**             | <code>string</code>                           | Filter devices by name                                                                                                                                                                                                                                    |
+| **`namePrefix`**       | <code>string</code>                           | Filter devices by name prefix                                                                                                                                                                                                                             |
+| **`optionalServices`** | <code>string[]</code>                         | For **web**, all services that will be used have to be listed under services or optionalServices, e.g. [numberToUUID(0x180f)] (see [UUID format](#uuid-format))                                                                                           |
+| **`allowDuplicates`**  | <code>boolean</code>                          | Normally scans will discard the second and subsequent advertisements from a single device. If you need to receive them, set allowDuplicates to true (only applicable in `requestLEScan`). (default: false)                                                |
+| **`scanMode`**         | <code><a href="#scanmode">ScanMode</a></code> | Android scan mode (default: <a href="#scanmode">ScanMode.SCAN_MODE_BALANCED</a>)                                                                                                                                                                          |
+
+#### ScanResult
+
+| Prop                   | Type                                                              | Description                                                                                                                                                                                                                                                                                           |
+| ---------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`device`**           | <code><a href="#bledevice">BleDevice</a></code>                   | The peripheral device that was found in the scan. **Android** and **web**: `device.name` is always identical to `localName`. **iOS**: `device.name` is identical to `localName` the first time a device is discovered, but after connecting `device.name` is the cached GAP name in subsequent scans. |
+| **`localName`**        | <code>string</code>                                               | The name of the peripheral device from the advertisement data.                                                                                                                                                                                                                                        |
+| **`rssi`**             | <code>number</code>                                               | Received Signal Strength Indication.                                                                                                                                                                                                                                                                  |
+| **`txPower`**          | <code>number</code>                                               | Transmit power in dBm. A value of 127 indicates that it is not available.                                                                                                                                                                                                                             |
+| **`manufacturerData`** | <code>{ [key: string]: <a href="#dataview">DataView</a>; }</code> | Manufacturer data, key is a company identifier and value is the data.                                                                                                                                                                                                                                 |
+| **`serviceData`**      | <code>{ [key: string]: <a href="#dataview">DataView</a>; }</code> | Service data, key is a service UUID and value is the data.                                                                                                                                                                                                                                            |
+| **`uuids`**            | <code>string[]</code>                                             | Advertised services.                                                                                                                                                                                                                                                                                  |
+| **`rawAdvertisement`** | <code><a href="#dataview">DataView</a></code>                     | Raw advertisement data (**Android** only).                                                                                                                                                                                                                                                            |
 
 #### TimeoutOptions
 
@@ -1010,6 +1031,18 @@ buffer as needed.
 | Prop       | Type                |
 | ---------- | ------------------- |
 | **`uuid`** | <code>string</code> |
+
+#### CatchupOptions
+
+| Prop          | Type                |
+| ------------- | ------------------- |
+| **`endTime`** | <code>number</code> |
+
+### Type Aliases
+
+#### Data
+
+<code><a href="#dataview">DataView</a> | string</code>
 
 ### Enums
 

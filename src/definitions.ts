@@ -12,6 +12,17 @@ export interface InitializeOptions {
    * @default false
    */
   androidNeverForLocation?: boolean;
+
+  /**
+   * (Android only)
+   * Runs the BLE stack in a foreground service, so it can read and write
+   * while your app is in the background, or the device is in doze mode.
+   * @default false
+   */
+  isForeground?: boolean;
+
+  onInitSuccess?: (event: fInitSuccess | undefined) => void;
+  onInitFailed?: (event: fInitFailed | undefined) => void;
 }
 
 export interface RequestBleDeviceOptions {
@@ -199,6 +210,10 @@ export interface WriteDescriptorOptions {
   value: Data;
 }
 
+export interface CatchupOptions {
+  endTime: number;
+}
+
 export interface BooleanResult {
   value: boolean;
 }
@@ -216,6 +231,7 @@ export interface ReadRssiResult {
 }
 
 export interface ReadResult {
+  timestamp?: number;
   /**
    * android, ios: string
    * web: DataView
@@ -232,6 +248,14 @@ export interface ScanResultInternal<T = Data> {
   serviceData?: { [key: string]: T };
   uuids?: string[];
   rawAdvertisement?: T;
+}
+
+export interface fInitSuccess {
+  value?: Data;
+}
+
+export interface fInitFailed {
+  value?: Data;
 }
 
 export interface ScanResult {
@@ -278,6 +302,7 @@ export interface BluetoothLePlugin {
   disable(): Promise<void>;
   startEnabledNotifications(): Promise<void>;
   stopEnabledNotifications(): Promise<void>;
+
   isLocationEnabled(): Promise<BooleanResult>;
   openLocationSettings(): Promise<void>;
   openBluetoothSettings(): Promise<void>;
@@ -291,6 +316,8 @@ export interface BluetoothLePlugin {
   addListener(eventName: 'onEnabledChanged', listenerFunc: (result: BooleanResult) => void): PluginListenerHandle;
   addListener(eventName: string, listenerFunc: (event: ReadResult) => void): PluginListenerHandle;
   addListener(eventName: 'onScanResult', listenerFunc: (result: ScanResultInternal) => void): PluginListenerHandle;
+  addListener(eventName: 'foregroundInitSuccess', listenerFunc: (event: fInitSuccess) => void): PluginListenerHandle;
+  addListener(eventName: 'foregroundInitFailed', listenerFunc: (event: fInitFailed) => void): PluginListenerHandle;
   connect(options: DeviceIdOptions & TimeoutOptions): Promise<void>;
   createBond(options: DeviceIdOptions): Promise<void>;
   isBonded(options: DeviceIdOptions): Promise<BooleanResult>;
@@ -302,10 +329,11 @@ export interface BluetoothLePlugin {
   readRssi(options: DeviceIdOptions): Promise<ReadRssiResult>;
   read(options: ReadOptions & TimeoutOptions): Promise<ReadResult>;
   write(options: WriteOptions & TimeoutOptions): Promise<void>;
-  writeInfinite(options: WriteOptions & TimeoutOptions): Promise<void>;
   writeWithoutResponse(options: WriteOptions & TimeoutOptions): Promise<void>;
   readDescriptor(options: ReadDescriptorOptions & TimeoutOptions): Promise<ReadResult>;
   writeDescriptor(options: WriteDescriptorOptions & TimeoutOptions): Promise<void>;
   startNotifications(options: ReadOptions): Promise<void>;
   stopNotifications(options: ReadOptions): Promise<void>;
+  clearCache(): Promise<void>;
+  catchup(options: CatchupOptions): Promise<void>;
 }

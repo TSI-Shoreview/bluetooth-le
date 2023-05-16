@@ -25,6 +25,7 @@ import type {
   WriteDescriptorOptions,
   GetMtuResult,
   RequestConnectionPriorityOptions,
+  CatchupOptions,
 } from './definitions';
 import { runWithTimeout } from './timeout';
 
@@ -303,13 +304,6 @@ export class BluetoothLeWeb extends WebPlugin implements BluetoothLePlugin {
     await characteristic?.writeValueWithResponse(dataView);
   }
 
-  async writeInfinite(options: WriteOptions): Promise<void> {
-    const characteristic = await this.getCharacteristic(options)
-    let dataView: DataView
-      dataView = hexStringToDataView("ping");
-    await characteristic?.writeValueWithoutResponse(dataView)
-  }
-
   async writeWithoutResponse(options: WriteOptions): Promise<void> {
     const characteristic = await this.getCharacteristic(options);
     let dataView: DataView;
@@ -359,6 +353,14 @@ export class BluetoothLeWeb extends WebPlugin implements BluetoothLePlugin {
     const characteristic = await this.getCharacteristic(options);
     await characteristic?.stopNotifications();
   }
+  
+  async clearCache(): Promise<void> {
+    throw this.unavailable('clearCache is not available on web.');
+  }
+
+  async catchup(_options: CatchupOptions): Promise<void> {
+    throw this.unavailable('clearCache is not available on web.');
+  }
 
   private getFilters(options?: RequestBleDeviceOptions): BluetoothLEScanFilter[] {
     const filters: BluetoothLEScanFilter[] = [];
@@ -394,4 +396,6 @@ export class BluetoothLeWeb extends WebPlugin implements BluetoothLePlugin {
     };
     return bleDevice;
   }
+
+  
 }

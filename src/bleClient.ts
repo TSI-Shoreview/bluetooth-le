@@ -6,6 +6,7 @@ import { dataViewToHexString, hexStringToDataView } from './conversion';
 import type {
   BleDevice,
   BleService,
+  CatchupOptions,
   ConnectionPriority,
   Data,
   InitializeOptions,
@@ -220,18 +221,6 @@ export interface BleClientInterface {
   ): Promise<void>;
 
   /**
-   * Write to a characteristic infinitely. Right now just writes "ping"
-   * @param deviceId
-   * @param service
-   * @param characteristic
-   */
-  writeInfinite(
-    deviceId: string,
-    service: string,
-    characteristic: string
-  ): Promise<void>;
-
-  /**
    * Write a value to a characteristic without waiting for a response.
    * @param deviceId The ID of the device to use (obtained from [requestDevice](#requestDevice) or [requestLEScan](#requestLEScan))
    * @param service UUID of the service (see [UUID format](#uuid-format))
@@ -295,7 +284,7 @@ export interface BleClientInterface {
     deviceId: string,
     service: string,
     characteristic: string,
-    callback: (value: DataView) => void
+    callback: (timestamp: number, value: DataView) => void
   ): Promise<void>;
 
   /**
@@ -305,6 +294,10 @@ export interface BleClientInterface {
    * @param characteristic UUID of the characteristic (see [UUID format](#uuid-format))
    */
   stopNotifications(deviceId: string, service: string, characteristic: string): Promise<void>;
+
+  clearCache(): Promise<void>;
+
+  catchup(options: CatchupOptions): Promise<void>
 }
 
 class BleClientClass implements BleClientInterface {
@@ -322,6 +315,24 @@ class BleClientClass implements BleClientInterface {
 
   async initialize(options?: InitializeOptions): Promise<void> {
     await this.queue(async () => {
+      {
+        const key = `foregroundInitSuccess`;
+        await this.eventListeners.get(key)?.remove();
+        const listener = await BluetoothLe.addListener(key, (result) => {
+          if (!options?.onInitSuccess) return
+          options.onInitSuccess(result);
+        });
+        this.eventListeners.set(key, listener);
+      }
+      {
+        const key = `foregroundInitFailed`;
+        await this.eventListeners.get(key)?.remove();
+        const listener = await BluetoothLe.addListener(key, (result) => {
+          if (!options?.onInitFailed) return
+          options.onInitFailed(result);
+        });
+        this.eventListeners.set(key, listener);
+      }
       await BluetoothLe.initialize(options);
     });
   }
@@ -575,20 +586,6 @@ class BleClientClass implements BleClientInterface {
     });
   }
 
-  async writeInfinite(deviceId: string, service: string, characteristic: string): Promise<void> {
-      service = parseUUID(service)
-      characteristic = parseUUID(characteristic)
-
-      return this.queue(async () => {
-        await BluetoothLe.writeInfinite({
-          deviceId,
-          service,
-          characteristic,
-          value: "ping"
-        });
-      });
-  }
-
   async writeWithoutResponse(
     deviceId: string,
     service: string,
@@ -675,7 +672,7 @@ class BleClientClass implements BleClientInterface {
     deviceId: string,
     service: string,
     characteristic: string,
-    callback: (value: DataView) => void
+    callback: (timestamp: number, value: DataView) => void
   ): Promise<void> {
     service = parseUUID(service);
     characteristic = parseUUID(characteristic);
@@ -683,7 +680,7 @@ class BleClientClass implements BleClientInterface {
       const key = `notification|${deviceId}|${service}|${characteristic}`;
       await this.eventListeners.get(key)?.remove();
       const listener = await BluetoothLe.addListener(key, (event: ReadResult) => {
-        callback(this.convertValue(event?.value));
+        callback(event?.timestamp || -1, this.convertValue(event?.value));
       });
       this.eventListeners.set(key, listener);
       await BluetoothLe.startNotifications({
@@ -707,6 +704,18 @@ class BleClientClass implements BleClientInterface {
         characteristic,
       });
     });
+  }
+
+  async clearCache(): Promise<void> {
+    await this.queue(async () => {
+      await BluetoothLe.clearCache()
+    })
+  }
+
+  async catchup(options: CatchupOptions): Promise<void> {
+    await this.queue(async () => {
+      await BluetoothLe.catchup(options)
+    })
   }
 
   private validateRequestBleDeviceOptions(options: RequestBleDeviceOptions): RequestBleDeviceOptions {

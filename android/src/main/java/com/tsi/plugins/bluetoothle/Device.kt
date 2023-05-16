@@ -18,7 +18,7 @@ class Device(
     private val context: Context,
     bluetoothAdapter: BluetoothAdapter,
     private val address: String,
-    private val onDisconnect: () -> Unit) : java.io.Serializable
+    private val onDisconnect: () -> Unit)
 {
     companion object {
         private val TAG = Device::class.java.simpleName
